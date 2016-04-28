@@ -5,6 +5,12 @@ require 'open-uri'
 url = "http://www.nhl.com/scores/htmlreports/20092010/PL020001.HTM"
 page = Nokogiri::HTML(open(url))
 
+
+game_info = page.css("table[id='GameInfo']").first
+puts game_info.css("td").map(&:text)
+
+exit
+
 events = page.css("tr[class='evenColor']").map do |event|
   props = event.css("td")
   time = props[3].text
