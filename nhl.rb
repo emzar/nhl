@@ -2,7 +2,8 @@ require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
 
-page = Nokogiri::HTML(open("http://www.nhl.com/scores/htmlreports/20152016/PL020001.HTM"))
+url = "http://www.nhl.com/scores/htmlreports/20092010/PL020001.HTM"
+page = Nokogiri::HTML(open(url))
 
 events = page.css("tr[class='evenColor']").map do |event|
   props = event.css("td")
