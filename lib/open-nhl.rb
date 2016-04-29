@@ -1,15 +1,28 @@
+require_relative 'fetcher.rb'
 require_relative 'parser.rb'
 
 module OpenNHL
+  SEASON_GAMES =
+    {
+      2009 => 1230,
+      2010 => 1230,
+      2011 => 1230,
+      2012 => 720,
+      2013 => 1230,
+      2014 => 1230,
+      2015 => 1230,
+    }
+
   def self.events(options)
-    OpenNHL::Parser.play_by_play(options)
+    page = OpenNHL::Fetcher::play_by_play(options)
+    OpenNHL::Parser::play_by_play(page)
   end
 
   def self.years
-    OpenNHL::Parser::SEASON_GAMES.keys
+    OpenNHL::SEASON_GAMES.keys
   end
 
   def self.games_count(year)
-    OpenNHL::Parser::SEASON_GAMES[year]
+    OpenNHL::SEASON_GAMES[year]
   end
 end
