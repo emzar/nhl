@@ -1,4 +1,4 @@
-# nhl-html-parser
+# OpenNHL
 A simple gem to parse NHL HTML reports.
 
 ## Installation instructions
