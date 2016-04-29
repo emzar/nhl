@@ -1,8 +1,11 @@
+require 'nokogiri'
+
 module OpenNHL
   module Parser
     EVENT_CSS_SELECTOR = "tr[class='evenColor']"
 
-    def self.play_by_play(page)
+    def self.play_by_play(file)
+      page = Nokogiri::HTML(file)
       page.css(EVENT_CSS_SELECTOR).map { |html| parse_event(html) }
     end
 

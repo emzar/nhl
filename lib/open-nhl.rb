@@ -14,8 +14,8 @@ module OpenNHL
     }
 
   def self.events(options)
-    page = OpenNHL::Fetcher::play_by_play(options)
-    OpenNHL::Parser::play_by_play(page)
+    file = OpenNHL::Fetcher::play_by_play(options)
+    OpenNHL::Parser::play_by_play(file)
   end
 
   def self.years
