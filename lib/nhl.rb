@@ -2,35 +2,57 @@ require 'rubygems'
 require 'nokogiri'
 require 'open-uri'
 
-url = "http://www.nhl.com/scores/htmlreports/20092010/PL020001.HTM"
-page = Nokogiri::HTML(open(url))
+module NHL
+  class Parser
+    def self.play_by_play(year, game_id)
+      url = "http://www.nhl.com/scores/htmlreports/#{year}#{year + 1}/PL0#{20000 + game_id}.HTM"
+      page = Nokogiri::HTML(open(url))
+      page.css("tr[class='evenColor']").map do |event_html|
+        props = event_html.css('td')
+        time = props[3].text
+        pos = time.index(':')
+        event =
+          {
+            id:      props[0].text.to_i,
+            period:  props[1].text.to_i,
+            str:     props[2].text,
+            time:    time[0..pos + 2],
+            elapsed: time[pos + 3..-1],
+            type:    props[4].text.downcase.to_sym,
+            desc:    props[5].text,
+          }
+        players = parse_players(event_html)
+        event.merge!(players) if players
+        event
+      end
+    end
 
-events = page.css("tr[class='evenColor']").map do |event|
-  props = event.css("td")
-  time = props[3].text
-  pos = time.index(':')
-  prop_hash =
-    {
-      id:      props[0].text.to_i,
-      period:  props[1].text.to_i,
-      str:     props[2].text,
-      time:    time[0..pos + 2],
-      elapsed: time[pos + 3..-1],
-      event:   props[4].text.downcase.to_sym,
-      desc:    props[5].text,
-    }
-  if prop_hash[:event] != :gend
-    players = props[6].css('font').map do |player|
-      title = player['title'].split(" - ")
+    private
+
+    def self.parse_players(html)
+      tables = html.css('table')
+      return if tables.empty?
+      visitor_players = parse_players_table(tables[0])
+      home_players = parse_players_table(tables[visitor_players.size + 1])
       {
-        position: title[0].downcase.gsub(' ', '_').to_sym,
-        name:     title[1],
-        number:   player.text.to_i,
+        players:
+        {
+          visitor: visitor_players,
+          home:    home_players,
+        }
       }
     end
-    prop_hash.merge!(players: players)
-  end
-  prop_hash
-end
 
-puts events.select { |event| event[:event] == :goal}
+    def self.parse_players_table(html)
+      return unless html
+      html.css('font').map do |player|
+        title = player['title'].split(' - ')
+        {
+          position: title[0].downcase.gsub(' ', '_').to_sym,
+          name:     title[1],
+          number:   player.text.to_i,
+        }
+      end
+    end
+  end
+end
