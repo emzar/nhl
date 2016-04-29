@@ -12,6 +12,11 @@ OpenNHL::games_count(2012)
 OpenNHL::years
 ```
 
+- `OpenNHL::events(options)` returns an Array of all events from the game specified by year and id
+```ruby
+OpenNHL::events(year: 2015, game_id: 1)
+```
+
 ## Installation instructions
 To install this gem, just call
 ```sh
