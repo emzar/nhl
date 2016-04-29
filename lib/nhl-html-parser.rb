@@ -4,6 +4,18 @@ require 'open-uri'
 
 module NHL
   class Parser
+
+    SEASON_GAMES =
+      {
+        2009 => 1230,
+        2010 => 1230,
+        2011 => 1230,
+        2012 => 720,
+        2013 => 1230,
+        2014 => 1230,
+        2015 => 1230,
+      }
+
     def self.play_by_play(year, game_id)
       url = "http://www.nhl.com/scores/htmlreports/#{year}#{year + 1}/PL0#{20000 + game_id}.HTM"
       page = Nokogiri::HTML(open(url))
