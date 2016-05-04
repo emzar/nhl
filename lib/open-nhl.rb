@@ -1,5 +1,5 @@
-require_relative 'fetcher.rb'
-require_relative 'parser.rb'
+require_relative 'fetcher'
+require_relative 'parser'
 
 module OpenNHL
   SEASON_GAMES =
