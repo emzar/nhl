@@ -9,4 +9,6 @@ Gem::Specification.new do |s|
   s.files       = ['lib/open-nhl.rb', 'lib/parser.rb', 'lib/fetcher.rb']
   s.homepage    = 'https://github.com/emzar/open-nhl'
   s.license     = 'MIT'
+  s.add_runtime_dependency 'nokogiri', '>= 1.6.7.2'
+  s.add_development_dependency 'nokogiri', '>= 1.6.7.2'
 end
