@@ -5,8 +5,7 @@ module OpenNHL
   class Parser
     EVENT_CSS_SELECTOR = "tr[class='evenColor']"
     GAME_ID_FORMAT = "%s%d"
-    ATTENDANCE_FORMAT = "Attendance %d,%d"
-    ALTERNATIVE_ATTENDANCE_FORMAT = "Ass./Att. %d,%d"
+    ATTENDANCE_FORMAT = "%s%d,%d"
 
     TEAM_PROPERTIES =
       {
@@ -106,8 +105,7 @@ module OpenNHL
     def self.parse_arena_info(props)
       arena_info = props[10].text
       attendance = arena_info.scanf(ATTENDANCE_FORMAT)
-      attendance = arena_info.scanf(ALTERNATIVE_ATTENDANCE_FORMAT) if attendance.empty?
-      attendance = attendance[0] * 1000 + attendance[1]
+      attendance = attendance[1] * 1000 + attendance[2]
       at = 'at'
       pos = arena_info.index(at)
       if pos.nil?
