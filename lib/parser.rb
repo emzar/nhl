@@ -2,7 +2,7 @@ require 'nokogiri'
 require 'scanf'
 
 module OpenNHL
-  module Parser
+  class Parser
     EVENT_CSS_SELECTOR = "tr[class='evenColor']"
     GAME_ID_FORMAT = "Game %d"
     ATTENDANCE_FORMAT = "Attendance %d,%d"
@@ -21,19 +21,21 @@ module OpenNHL
           },
       }
 
-    def self.play_by_play(file)
-      page = Nokogiri::HTML(file)
-      page.css(EVENT_CSS_SELECTOR).map { |html| parse_event(html) }
+    def initialize(file)
+      @page = Nokogiri::HTML(file)
     end
 
-    def self.game_info(file)
-      page = Nokogiri::HTML(file)
-      props = page.css("td[align='center']")
-      info = { id: props[12].text.scanf(GAME_ID_FORMAT).first }
-      info.merge!(parse_arena_info(props))
-      info.merge!(parse_game_time(props))
+    def play_by_play
+      @page.css(EVENT_CSS_SELECTOR).map { |html| parse_event(html) }
+    end
+
+    def game_info
+      props = @page.css("td[align='center']")
+      info = { game_id: props[12].text.scanf(GAME_ID_FORMAT).first }
+      info.merge!(Parser::parse_arena_info(props))
+      info.merge!(Parser::parse_game_time(props))
       TEAM_PROPERTIES.each do |key, value|
-        info.merge!(key => parse_team_properties(props, value))
+        info.merge!(key => Parser::parse_team_properties(props, value))
       end
       info
     end
@@ -46,13 +48,13 @@ module OpenNHL
       pos = time.index(':')
       event =
         {
-          id:      props[0].text.to_i,
-          period:  props[1].text.to_i,
-          str:     props[2].text,
-          time:    time[0..pos + 2],
-          elapsed: time[pos + 3..-1],
-          type:    props[4].text.downcase.to_sym,
-          desc:    props[5].text,
+          event_id: props[0].text.to_i,
+          period:   props[1].text.to_i,
+          str:      props[2].text,
+          time:     time[0..pos + 2],
+          elapsed:  time[pos + 3..-1],
+          type:     props[4].text.downcase.to_sym,
+          desc:     props[5].text,
         }
       players = parse_players(html)
       event.merge!(players) if players
