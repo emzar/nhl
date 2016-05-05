@@ -6,18 +6,21 @@ module OpenNHL
     EVENT_CSS_SELECTOR = "tr[class='evenColor']"
     GAME_ID_FORMAT = "Game %d"
     ATTENDANCE_FORMAT = "Attendance %d,%d"
+    ALTERNATIVE_ATTENDANCE_FORMAT = "Ass./Att. %d,%d"
 
     TEAM_PROPERTIES =
       {
         visitor:
           {
-            score_index: 3,
-            game_type:   :away,
+            score_index:  3,
+            game_type:    :away,
+            game_type_fr: 'Étr.',
           },
         home:
           {
-            score_index: 16,
-            game_type:   :home,
+            score_index:  16,
+            game_type:    :home,
+            game_type_fr: 'Dom.',
           },
       }
 
@@ -99,25 +102,40 @@ module OpenNHL
     def self.parse_arena_info(props)
       arena_info = props[10].text
       attendance = arena_info.scanf(ATTENDANCE_FORMAT)
+      attendance = arena_info.scanf(ALTERNATIVE_ATTENDANCE_FORMAT) if attendance.empty?
       attendance = attendance[0] * 1000 + attendance[1]
-      pos = arena_info.index('at')
+      at = 'at'
+      pos = arena_info.index(at)
+      if pos.nil?
+        at = '@'
+        pos = arena_info.index(at)
+      end
       {
         attendance: attendance,
-        arena:      arena_info[pos + 'at'.length + 1..-1],
+        arena:      arena_info[pos + at.length + 1..-1],
       }
     end
 
     def self.parse_team_properties(props, value)
       index = value[:score_index]
       team_property = props[index + 2].text
-      pos = team_property.index('Game')
-      game_type = value[:game_type]
-      games = team_property[pos..-1].scanf("Game %d #{game_type.to_s.capitalize} Game %d")
+      game_type = value[:game_type].to_s.capitalize
+      match_pos = team_property.index('Match')
+      game_pos = team_property.index('Game')
+      pos = match_pos ? match_pos : game_pos
+      games_format =
+        if match_pos
+          game_type_fr = value[:game_type_fr]
+          "Match/Game %d #{game_type_fr}/#{game_type} %d"
+        else
+          "Game %d #{game_type} Game %d"
+        end
+      games = team_property[pos..-1].scanf(games_format)
       {
-        title:       team_property[0..pos - 1],
-        game:        games[0],
-        game_type => games[1],
-        score:       props[index].text.to_i
+        title:               team_property[0..pos - 1],
+        game:                games[0],
+        value[:game_type] => games[1],
+        score:               props[index].text.to_i,
       }
     end
   end
