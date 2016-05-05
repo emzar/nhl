@@ -1,12 +1,41 @@
 require 'nokogiri'
+require 'scanf'
 
 module OpenNHL
   module Parser
     EVENT_CSS_SELECTOR = "tr[class='evenColor']"
+    GAME_ID_FORMAT = "Game %d"
+    ATTENDANCE_FORMAT = "Attendance %d,%d"
+
+    TEAM_PROPERTIES =
+      {
+        visitor:
+          {
+            score_index: 3,
+            game_type:   :away,
+          },
+        home:
+          {
+            score_index: 16,
+            game_type:   :home,
+          },
+      }
 
     def self.play_by_play(file)
       page = Nokogiri::HTML(file)
       page.css(EVENT_CSS_SELECTOR).map { |html| parse_event(html) }
+    end
+
+    def self.game_info(file)
+      page = Nokogiri::HTML(file)
+      props = page.css("td[align='center']")
+      info = { id: props[12].text.scanf(GAME_ID_FORMAT).first }
+      info.merge!(parse_arena_info(props))
+      info.merge!(parse_game_time(props))
+      TEAM_PROPERTIES.each do |key, value|
+        info.merge!(key => parse_team_properties(props, value))
+      end
+      info
     end
 
     private
@@ -54,6 +83,40 @@ module OpenNHL
           number:   player.text.to_i,
         }
       end
+    end
+
+    def self.parse_game_time(props)
+      date = props[9].text
+      time = props[11].text.split(';')
+      {
+        start: DateTime.parse(date + time[0]),
+        end:   DateTime.parse(date + time[1]),
+      }
+    end
+
+    def self.parse_arena_info(props)
+      arena_info = props[10].text
+      attendance = arena_info.scanf(ATTENDANCE_FORMAT)
+      attendance = attendance[0] * 1000 + attendance[1]
+      pos = arena_info.index('at')
+      {
+        attendance: attendance,
+        arena:      arena_info[pos + 'at'.length + 1..-1],
+      }
+    end
+
+    def self.parse_team_properties(props, value)
+      index = value[:score_index]
+      team_property = props[index + 2].text
+      pos = team_property.index('Game')
+      game_type = value[:game_type]
+      games = team_property[pos..-1].scanf("Game %d #{game_type.to_s.capitalize} Game %d")
+      {
+        title:       team_property[0..pos - 1],
+        game:        games[0],
+        game_type => games[1],
+        score:       props[index].text.to_i
+      }
     end
   end
 end
