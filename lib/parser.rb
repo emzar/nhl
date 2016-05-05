@@ -4,7 +4,7 @@ require 'scanf'
 module OpenNHL
   class Parser
     EVENT_CSS_SELECTOR = "tr[class='evenColor']"
-    GAME_ID_FORMAT = "Game %d"
+    GAME_ID_FORMAT = "%s%d"
     ATTENDANCE_FORMAT = "Attendance %d,%d"
     ALTERNATIVE_ATTENDANCE_FORMAT = "Ass./Att. %d,%d"
 
@@ -34,7 +34,7 @@ module OpenNHL
 
     def game_info
       props = @page.css("td[align='center']")
-      info = { game_id: props[12].text.scanf(GAME_ID_FORMAT).first }
+      info = { game_id: Parser::parse_game_id(props) }
       info.merge!(Parser::parse_arena_info(props))
       info.merge!(Parser::parse_game_time(props))
       TEAM_PROPERTIES.each do |key, value|
@@ -88,6 +88,10 @@ module OpenNHL
           number:   player.text.to_i,
         }
       end
+    end
+
+    def self.parse_game_id(props)
+      props[12].text.scanf(GAME_ID_FORMAT)[1]
     end
 
     def self.parse_game_time(props)
