@@ -6,7 +6,13 @@ Gem::Specification.new do |s|
   s.description = "A simple gem to parse NHL HTML reports"
   s.authors     = ["Ivan Mironov"]
   s.email       = 'ivan.mironov@gmail.com'
-  s.files       = ['lib/open-nhl.rb', 'lib/parser.rb', 'lib/fetcher.rb', 'lib/season.rb']
+  s.files       = ['lib/open-nhl.rb',
+                   'lib/parser.rb',
+                   'lib/fetcher.rb',
+                   'lib/season.rb',
+                   'lib/game_info.rb',
+                   'lib/play_by_play.rb',
+                  ]
   s.homepage    = 'https://github.com/emzar/open-nhl'
   s.license     = 'MIT'
   s.add_runtime_dependency 'nokogiri', '~> 1.6', '>= 1.6.7.2'
