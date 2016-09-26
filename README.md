@@ -2,19 +2,9 @@
 A simple gem to parse NHL HTML reports.
 
 ## Usage
-- `OpenNHL::games_count(year)` returns a count of games in specified year
+- `OpenNHL::info(options)` returns a Hash of common info and all events count of the game specified by season id and geme id
 ```ruby
-OpenNHL::games_count(2012)
-```
-
-- `OpenNHL::years` returns an Array of all available years of seasons start
-```ruby
-OpenNHL::years
-```
-
-- `OpenNHL::events(options)` returns an Array of all events from the game specified by year and id
-```ruby
-OpenNHL::events(year: 2015, game_id: 1)
+OpenNHL::info(season_id: 93, game_id: 100)
 ```
 
 ## Installation instructions
